@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 # simple script to query the existance of specific Oracle jdk executable, if installed.
 #
 # @return: JSON string : { "found": true/false, "not_found": true/false }
