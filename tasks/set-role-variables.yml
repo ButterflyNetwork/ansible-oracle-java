@@ -181,6 +181,7 @@
     # The Java installation directory on Mac OS X is determined by the package itself.
     java_install_dir: /no_such_directory
     java_default_link_name: default
+    java_home: "/Library/Java/JavaVirtualMachines/jdk1.{{ java_version }}.0_{{ java_subversion }}.jdk/Contents/Home"
   when: ansible_os_family == "Darwin"
 
 - name: set java installation directory on non-Debian platforms
