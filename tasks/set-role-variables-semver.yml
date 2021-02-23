@@ -1,0 +1,41 @@
+---
+# file: tasks/set-role-variables-semver.yml
+# set necessary role variables for semver.
+#
+
+- name: set java OS for Mac OS X
+  set_fact:
+    jdk_os: osx
+  when: ansible_os_family == 'Darwin'
+
+- name: set jdk_version
+  set_fact:
+    jdk_version: "{{ java_version }}"
+
+
+#
+# version-specific variables
+#
+
+- name: set internal vars for 11.0.10
+  set_fact:
+    jdk_version_detail: 11.0.10%2B8
+    jdk_tarball_hash: 020c4a6d33b74f6a9d2bc6fbf189da81
+  when: java_version == "11.0.10"
+
+- name: compose filename
+  set_fact:
+    jdk_tarball_file: "jdk-{{ java_version }}_{{ jdk_os }}-{{ jdk_arch }}_bin"
+
+
+#
+# directories
+#
+
+- name: set java installation directory on Mac OS X
+  set_fact:
+    # The Java installation directory on Mac OS X is determined by the package itself.
+    java_install_dir: /no_such_directory
+    java_default_link_name: default
+    java_home: "/Library/Java/JavaVirtualMachines/jdk-{{ java_version }}.jdk/Contents/Home"
+  when: ansible_os_family == "Darwin"

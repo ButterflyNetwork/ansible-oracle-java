@@ -9,15 +9,13 @@
 
 - name: precondition - java_subversion
   fail: msg="ERROR - required variable 'java_subversion' missing."
-  when: java_subversion is not defined
+  when: java_version is not regex("\d+\.\d+\.\d+") and java_subversion is not defined
 
 - name: precondition - java_install_jce
   fail: msg="ERROR - required variable 'java_install_jce' missing."
   when: java_install_jce is not defined
 
 - include: set-role-variables.yml
-
-
 
 - name: install libselinux-python binary for Ansible to work
   yum: name=libselinux-python state=present
