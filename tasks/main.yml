@@ -21,19 +21,40 @@
   yum: name=libselinux-python state=present
   when: ansible_pkg_mgr == "yum"
 
-- name: copy scripts to server
-  copy: src="../files/check-java-version.sh"  dest="{{ java_download_path }}/"  mode="a+x"
+# TODO: Support multiple JDK installations.
+- name: check if specific version of Oracle JDK is installed? (non-Mac)
+  block:
+    - name: copy scripts to server
+      copy: src="../files/check-java-version.sh"  dest="{{ java_download_path }}/"  mode="a+x"
 
-- name: check if specific version of Oracle JDK is installed?
-  shell: LC_ALL="en_US.UTF-8"  {{ java_download_path }}/check-java-version.sh  "{{ jdk_version }}"
-  register: jdk_info
-  changed_when: false
-  failed_when: jdk_info.rc > 0
+    - name: get jdk_info
+      shell: LC_ALL="en_US.UTF-8"  {{ java_download_path }}/check-java-version.sh  "{{ jdk_version }}"
+      register: jdk_info
+      changed_when: false
+      failed_when: jdk_info.rc > 0
 
-#- debug: var=jdk_info
+    - name: set jdk_already_installed
+      set_fact:
+        jdk_already_installed: "{{ (jdk_info.stdout|from_json).found | bool }}"
+  when: ansible_os_family != "Darwin"
+
+- name: check if specific version of Oracle JDK is installed? (Mac OS X)
+  block:
+    - name: get jdk_info
+      shell: /usr/libexec/java_home -v "{{ jdk_version }}"
+      register: jdk_info
+      changed_when: false
+      failed_when: false
+
+    - name: set jdk_already_installed
+      set_fact:
+        jdk_already_installed: "{{ (jdk_info.rc == 0) | bool }}"
+  when: ansible_os_family == "Darwin"
+
+#- debug: var=jdk_already_installed
 
 - include: install.yml
-  when: (jdk_info.stdout|from_json).not_found
+  when: not jdk_already_installed
 
 - name: delegate to JCE zip installation process
   include: install_jce.yml
