@@ -41,7 +41,7 @@
 - name: check if specific version of Oracle JDK is installed? (Mac OS X)
   block:
     - name: get jdk_info
-      shell: /usr/libexec/java_home -v "{{ jdk_version }}"
+      shell: /usr/libexec/java_home -V 2>&1 | grep -E '\b{{ jdk_version.replace('.', '\.') }}\b'
       register: jdk_info
       changed_when: false
       failed_when: false
