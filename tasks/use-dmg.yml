@@ -8,13 +8,23 @@
 - name: mount the downloaded dmg
   shell: hdiutil attach "{{ java_download_path }}/{{ jdk_tarball_file }}.dmg"
 
+- name: set dmg name (semver)
+  set_fact:
+    dmg_name: "JDK {{ java_version }}"
+  when: java_version_is_semver is true
+
+- name: set dmg name (version / subversion)
+  set_fact:
+    dmg_name: "JDK {{ java_version }} Update {{ java_subversion }}"
+  when: java_version_is_semver is false
+
 - name: install the pkg file from the dmg
   become: yes
   become_method: sudo
   shell: >
     installer
-    -pkg "/Volumes/JDK {{ java_version }} Update {{ java_subversion }}/JDK {{ java_version }} Update {{ java_subversion }}.pkg"
+    -pkg "/Volumes/{{ dmg_name }}/{{ dmg_name }}.pkg"
     -target /
 
 - name: unmount the downloaded dmg
-  shell: hdiutil detach "/Volumes/JDK {{ java_version }} Update {{ java_subversion }}"
+  shell: hdiutil detach "/Volumes/{{ dmg_name }}"
